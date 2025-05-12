@@ -1,0 +1,6 @@
+<launch>
+    <node pkg="image_publisher" type="image_publisher_node.py" name="image_publisher_node_1" output="screen"/>
+    <node pkg="detect2" type="main2.py" name="main_detect_2" output="screen"/>
+    <node pkg="detect" type="main.py" name="main_detect_1" output="screen"/>
+    <node pkg="my_serial" type="RMSerial.py" name="RMSerial" output="screen"/>
+</launch>    
