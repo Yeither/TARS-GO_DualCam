@@ -1,0 +1,11 @@
+my_serial
+/home/yang/double_camera/devel/.private/my_serial/cmake.lock /home/yang/double_camera/devel/./cmake.lock
+/home/yang/double_camera/devel/.private/my_serial/lib/my_serial/cmake.lock /home/yang/double_camera/devel/lib/my_serial/cmake.lock
+/home/yang/double_camera/devel/.private/my_serial/lib/my_serial/RMSerial.py /home/yang/double_camera/devel/lib/my_serial/RMSerial.py
+/home/yang/double_camera/devel/.private/my_serial/lib/python3/dist-packages/my_serial/__init__.py /home/yang/double_camera/devel/lib/python3/dist-packages/my_serial/__init__.py
+/home/yang/double_camera/devel/.private/my_serial/lib/pkgconfig/my_serial.pc /home/yang/double_camera/devel/lib/pkgconfig/my_serial.pc
+/home/yang/double_camera/devel/.private/my_serial/share/roseus/ros/my_serial/manifest.l /home/yang/double_camera/devel/share/roseus/ros/my_serial/manifest.l
+/home/yang/double_camera/devel/.private/my_serial/share/my_serial/cmake/my_serialConfig.cmake /home/yang/double_camera/devel/share/my_serial/cmake/my_serialConfig.cmake
+/home/yang/double_camera/devel/.private/my_serial/share/my_serial/cmake/my_serial-msg-extras.cmake /home/yang/double_camera/devel/share/my_serial/cmake/my_serial-msg-extras.cmake
+/home/yang/double_camera/devel/.private/my_serial/share/my_serial/cmake/my_serialConfig-version.cmake /home/yang/double_camera/devel/share/my_serial/cmake/my_serialConfig-version.cmake
+/home/yang/double_camera/devel/.private/my_serial/share/my_serial/cmake/my_serial-msg-paths.cmake /home/yang/double_camera/devel/share/my_serial/cmake/my_serial-msg-paths.cmake

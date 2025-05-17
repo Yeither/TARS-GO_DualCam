@@ -1,0 +1,5 @@
+galaxy_camera
+/home/yang/double_camera/devel/.private/galaxy_camera/cmake.lock /home/yang/double_camera/devel/./cmake.lock
+/home/yang/double_camera/devel/.private/galaxy_camera/lib/pkgconfig/galaxy_camera.pc /home/yang/double_camera/devel/lib/pkgconfig/galaxy_camera.pc
+/home/yang/double_camera/devel/.private/galaxy_camera/share/galaxy_camera/cmake/galaxy_cameraConfig.cmake /home/yang/double_camera/devel/share/galaxy_camera/cmake/galaxy_cameraConfig.cmake
+/home/yang/double_camera/devel/.private/galaxy_camera/share/galaxy_camera/cmake/galaxy_cameraConfig-version.cmake /home/yang/double_camera/devel/share/galaxy_camera/cmake/galaxy_cameraConfig-version.cmake

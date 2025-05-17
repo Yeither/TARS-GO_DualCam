@@ -1,0 +1,5 @@
+image_publisher
+/home/yang/double_camera/devel/.private/image_publisher/cmake.lock /home/yang/double_camera/devel/./cmake.lock
+/home/yang/double_camera/devel/.private/image_publisher/lib/pkgconfig/image_publisher.pc /home/yang/double_camera/devel/lib/pkgconfig/image_publisher.pc
+/home/yang/double_camera/devel/.private/image_publisher/share/image_publisher/cmake/image_publisherConfig-version.cmake /home/yang/double_camera/devel/share/image_publisher/cmake/image_publisherConfig-version.cmake
+/home/yang/double_camera/devel/.private/image_publisher/share/image_publisher/cmake/image_publisherConfig.cmake /home/yang/double_camera/devel/share/image_publisher/cmake/image_publisherConfig.cmake

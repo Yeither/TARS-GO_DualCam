@@ -1,0 +1,33 @@
+state: 'R'
+
+device_down:
+  image:
+    npy: '/home/yang/double_camera/src/detect/scripts/npy/arrays_test_red.npy'
+    map_v: '/home/yang/double_camera/src/detect/scripts/images/map_red.jpg'
+    mask_map: '/home/yang/double_camera/src/detect/scripts/images/map_mask.jpg'
+    hide_map: '/home/yang/double_camera/src/detect/scripts/images/hide_mask.jpg'
+    map: '/home/yang/double_camera/src/detect/scripts/images/map.jpg'
+
+  detect:
+    car:
+      engine: '/home/yang/double_camera/src/detect/scripts/models/car_m.engine'
+      yaml: '/home/yang/double_camera/src/detect/scripts/yaml/car.yaml'
+    armor:
+      engine: '/home/yang/double_camera/src/detect/scripts/models/armor.engine'
+      yaml: '/home/yang/double_camera/src/detect/scripts/yaml/armor.yaml'
+
+device_up:
+  image:
+    npy: '/home/yang/double_camera/src/detect2/scripts/npy/arrays_test_red.npy'
+    map_v: '/home/yang/double_camera/src/detect2/scripts/images/map_red.jpg'
+    mask_map: '/home/yang/double_camera/src/detect2/scripts/images/map_mask.jpg'
+    hide_map: '/home/yang/double_camera/src/detect2/scripts/images/hide_mask.jpg'
+    map: '/home/yang/double_camera/src/detect2/scripts/images/map.jpg'
+
+  detect:
+    car:
+      engine: '/home/yang/double_camera/src/detect2/scripts/models/car_m.engine'
+      yaml: '/home/yang/double_camera/src/detect2/scripts/yaml/car.yaml'
+    armor:
+      engine: '/home/yang/double_camera/src/detect2/scripts/models/armor.engine'
+      yaml: '/home/yang/double_camera/src/detect2/scripts/yaml/armor.yaml'

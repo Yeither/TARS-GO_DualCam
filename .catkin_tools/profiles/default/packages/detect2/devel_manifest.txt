@@ -1,0 +1,22 @@
+detect2
+/home/yang/double_camera/devel/.private/detect2/cmake.lock /home/yang/double_camera/devel/./cmake.lock
+/home/yang/double_camera/devel/.private/detect2/lib/detect2/main2.py /home/yang/double_camera/devel/lib/detect2/main2.py
+/home/yang/double_camera/devel/.private/detect2/lib/detect2/cmake.lock /home/yang/double_camera/devel/lib/detect2/cmake.lock
+/home/yang/double_camera/devel/.private/detect2/lib/python3/dist-packages/detect2/__init__.py /home/yang/double_camera/devel/lib/python3/dist-packages/detect2/__init__.py
+/home/yang/double_camera/devel/.private/detect2/lib/python3/dist-packages/detect2/msg/__init__.py /home/yang/double_camera/devel/lib/python3/dist-packages/detect2/msg/__init__.py
+/home/yang/double_camera/devel/.private/detect2/lib/python3/dist-packages/detect2/msg/_Serial_Send_Up.py /home/yang/double_camera/devel/lib/python3/dist-packages/detect2/msg/_Serial_Send_Up.py
+/home/yang/double_camera/devel/.private/detect2/lib/pkgconfig/detect2.pc /home/yang/double_camera/devel/lib/pkgconfig/detect2.pc
+/home/yang/double_camera/devel/.private/detect2/include/detect2/Serial_Send_Up.h /home/yang/double_camera/devel/include/detect2/Serial_Send_Up.h
+/home/yang/double_camera/devel/.private/detect2/share/roseus/ros/detect2/manifest.l /home/yang/double_camera/devel/share/roseus/ros/detect2/manifest.l
+/home/yang/double_camera/devel/.private/detect2/share/roseus/ros/detect2/msg/Serial_Send_Up.l /home/yang/double_camera/devel/share/roseus/ros/detect2/msg/Serial_Send_Up.l
+/home/yang/double_camera/devel/.private/detect2/share/common-lisp/ros/detect2/msg/Serial_Send_Up.lisp /home/yang/double_camera/devel/share/common-lisp/ros/detect2/msg/Serial_Send_Up.lisp
+/home/yang/double_camera/devel/.private/detect2/share/common-lisp/ros/detect2/msg/detect2-msg.asd /home/yang/double_camera/devel/share/common-lisp/ros/detect2/msg/detect2-msg.asd
+/home/yang/double_camera/devel/.private/detect2/share/common-lisp/ros/detect2/msg/_package.lisp /home/yang/double_camera/devel/share/common-lisp/ros/detect2/msg/_package.lisp
+/home/yang/double_camera/devel/.private/detect2/share/common-lisp/ros/detect2/msg/_package_Serial_Send_Up.lisp /home/yang/double_camera/devel/share/common-lisp/ros/detect2/msg/_package_Serial_Send_Up.lisp
+/home/yang/double_camera/devel/.private/detect2/share/detect2/cmake/detect2-msg-paths.cmake /home/yang/double_camera/devel/share/detect2/cmake/detect2-msg-paths.cmake
+/home/yang/double_camera/devel/.private/detect2/share/detect2/cmake/detect2-msg-extras.cmake /home/yang/double_camera/devel/share/detect2/cmake/detect2-msg-extras.cmake
+/home/yang/double_camera/devel/.private/detect2/share/detect2/cmake/detect2Config.cmake /home/yang/double_camera/devel/share/detect2/cmake/detect2Config.cmake
+/home/yang/double_camera/devel/.private/detect2/share/detect2/cmake/detect2Config-version.cmake /home/yang/double_camera/devel/share/detect2/cmake/detect2Config-version.cmake
+/home/yang/double_camera/devel/.private/detect2/share/gennodejs/ros/detect2/_index.js /home/yang/double_camera/devel/share/gennodejs/ros/detect2/_index.js
+/home/yang/double_camera/devel/.private/detect2/share/gennodejs/ros/detect2/msg/Serial_Send_Up.js /home/yang/double_camera/devel/share/gennodejs/ros/detect2/msg/Serial_Send_Up.js
+/home/yang/double_camera/devel/.private/detect2/share/gennodejs/ros/detect2/msg/_index.js /home/yang/double_camera/devel/share/gennodejs/ros/detect2/msg/_index.js

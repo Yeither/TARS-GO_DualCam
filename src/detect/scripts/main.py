@@ -18,19 +18,37 @@ import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
+# ROS节点初始化
+rospy.init_node('main_image_listener', anonymous=True)
 
-state = 'R'  # R:红方/B:蓝方
+# yaml读取
+state =  rospy.get_param("/state")   # R：红方；B：蓝方
+npy_path = rospy.get_param("/device_down/image/npy")
+map_v_path = rospy.get_param("/device_down/image/map_v")
+mask_map_path = rospy.get_param("/device_down/image/mask_map")
+hide_map_path = rospy.get_param("/device_down/image/hide_map")
+map_path = rospy.get_param("/device_down/image/map")
+car_engine_path = rospy.get_param("/device_down/detect/car/engine")
+car_yaml_path = rospy.get_param("/device_down/detect/car/yaml")
+armor_engine_path = rospy.get_param("/device_down/detect/armor/engine")
+armor_yaml_path = rospy.get_param("/device_down/detect/armor/yaml")
+print("*"*12,"config","*"*12)
+print('state              :', state)
+print('npy_path           :', npy_path)
+print('map_v_path         :', map_v_path)
+print('mask_map_path      :', mask_map_path)
+print('hide_map_path      :', hide_map_path)
+print('map_path           :', map_path)
+print('car_engine_path    :', car_engine_path)
+print('car_yaml_path      :', car_yaml_path)
+print('armor_engine_path  :', armor_engine_path)
+print('armor_yaml_path    :', armor_yaml_path)
+print("*"*30)
 
-if state == 'R':
-    loaded_arrays = np.load('/home/yang/double_camera/src/detect/scripts/npy/arrays_test_red.npy')  # 加载标定好的仿射变换矩阵
-    map_image = cv2.imread("/home/yang/double_camera/src/detect/scripts/images/map_red.jpg")  # 加载红方视角地图
-    mask_image = cv2.imread("/home/yang/double_camera/src/detect/scripts/images/map_mask.jpg")  # 加载红发落点判断掩码
-    hide_mask = cv2.imread('/home/yang/double_camera/src/detect/scripts/images/hide_mask.jpg')
-else:
-    loaded_arrays = np.load('/home/yang/double_camera/src/detect/scripts/npy/arrays_test_blue.npy')  # 加载标定好的仿射变换矩阵
-    map_image = cv2.imread("/home/yang/double_camera/src/detect/scripts/images/map_blue.jpg")  # 加载蓝方视角地图
-    mask_image = cv2.imread("/home/yang/double_camera/src/detect/scripts/images/map_mask.jpg")  # 加载蓝方落点判断掩码
-    hide_mask = cv2.imread('/home/yang/double_camera/src/detect/scripts/images/hide_mask.jpg')
+loaded_arrays = np.load(npy_path)  # 加载标定好的仿射变换矩阵
+map_image = cv2.imread(map_v_path)  # 加载红方视角地图
+mask_image = cv2.imread(mask_map_path)  # 加载红发落点判断掩码
+hide_mask = cv2.imread(hide_map_path)
 
 # 导入战场每个高度的不同仿射变化矩阵
 M_height_r = loaded_arrays[1]  # R型高地
@@ -46,7 +64,7 @@ width -= 1
 if_guess = [False,False,False,False,False] # 欣姐说我得给哨兵数据
 
 # 加载战场地图
-map_backup = cv2.imread("/home/yang/double_camera/src/detect/scripts/images/map.jpg")
+map_backup = cv2.imread(map_path)
 map = map_backup.copy()
 
 # 盲区预测次数
@@ -121,17 +139,17 @@ guess_index = {
 # 英雄：
 # 中央高地
 guess_table_B = {
-    "G0": [(6.62,7.52), (4.08,7.54)],           # 堡垒，家
-    "G1": [(2.16, 0.92), (13.44, 7.98)],        # 兑换站，大风车
-    "G2": [(10.7,11.34), (9.3,12.8)],           # 洞，高地
-    "G3": [(2.48, 2.52), (10.68, 11.26)]        # 维修站，洞
+    "G0": [(662,752), (408,754)],           # 堡垒，家
+    "G1": [(216, 92), (1344, 798)],        # 兑换站，大风车
+    "G2": [(1070,1134), (930,1280)],           # 洞，高地
+    "G3": [(248, 252), (1068, 1126)]        # 维修站，洞
 }
 
 guess_table_R = {
-    "G0": [(21.28, 7.54),(23.88, 7.54)],
-    "G1": [(25.82, 13.98), (14.74, 7.00)],
-    "G2": [(17.24, 3.70), (18.72, 2.26)],
-    "G3": [(25.44, 12.54), (17.36, 3.92)]
+    "G0": [(2128, 754),(2388, 754)],
+    "G1": [(2582, 1398), (1474, 700)],
+    "G2": [(1724, 370), (1872, 226)],
+    "G3": [(2544, 1254), (1736, 392)]
 }
 
 target_position = [[0.0,0.0], [0.0,0.0], [0.0,0.0], [0.0,0.0], [0.0,0.0], [0.0,0.0]]
@@ -172,10 +190,9 @@ def ser_send(pub):
         except Exception as r:
             # import traceback
             # traceback.print_exc()
-            print('send_point 未知错误 %s' % (r))
+            print('send_point 错误 %s' % (r))
             time.sleep(0.5)
             return False
-
 
 
     def get_guess_point(send_name):
@@ -188,50 +205,49 @@ def ser_send(pub):
                 else:
                     guess_point = guess_table_B["G0"][1]
                     guess_value[send_name] = 0
+            elif send_name == "R1":
+                if guess_value[send_name] == 0:
+                    guess_point = guess_table_B["G2"][0]
+                    guess_value[send_name] = 1
+                else:
+                    guess_point = guess_table_B["G2"][1]
+                    guess_value[send_name] = 0
+            elif send_name == "R2":
+                if guess_index[send_name] == 1:
+                    guess_point = guess_table_B["G1"][0]
+                else:
+                    guess_point = guess_table_B["G1"][1]
             else:
                 if guess_index[send_name] == 1:
-                    if send_name == "R2":
-                        guess_point = guess_table_B["G1"][0]
-                    else:
-                        guess_point = guess_table_B["G1"][1]
-                if guess_index[send_name] == 2:
-                    value = guess_value[send_name] % 2
-                    guess_point = guess_table_B["G2"][value]
-                    guess_value[send_name] = guess_value[send_name]+1
-                    if guess_value[send_name] == 5:
-                        guess_value[send_name] = -1
-                if guess_index[send_name] == 3:
-                    value = guess_value[send_name] % 2
-                    guess_point = guess_table_B["G3"][value]
-                    guess_value[send_name] = guess_value[send_name]+1
-                    if guess_value[send_name] == 5:
-                        guess_value[send_name] = -1
+                    guess_point = guess_table_B["G3"][1]
+                else:
+                    guess_point = guess_table_B["G3"][0]
+
         if state == 'R':
             if send_name == "B7":
                 if guess_value[send_name] == 0:
-                    guess_point = guess_table_B["G0"][0]
+                    guess_point = guess_table_R["G0"][0]
                     guess_value[send_name] = 1
                 else:
-                    guess_point = guess_table_B["G0"][1]
+                    guess_point = guess_table_R["G0"][1]
                     guess_value[send_name] = 0
+            elif send_name == "B1":
+                if guess_value[send_name] == 0:
+                    guess_point = guess_table_R["G2"][0]
+                    guess_value[send_name] = 1
+                else:
+                    guess_point = guess_table_R["G2"][1]
+                    guess_value[send_name] = 0
+            elif send_name == "B2":
+                if guess_index[send_name] == 1:
+                    guess_point = guess_table_R["G1"][0]
+                else:
+                    guess_point = guess_table_R["G1"][1]
             else:
                 if guess_index[send_name] == 1:
-                    if send_name == "B2":
-                        guess_point = guess_table_R["G1"][0]
-                    else:
-                        guess_point = guess_table_R["G1"][1]
-                if guess_index[send_name] == 2:
-                    value = guess_value[send_name] % 2
-                    guess_point = guess_table_B["G2"][value]
-                    guess_value[send_name] = guess_value[send_name]+1
-                    if guess_value[send_name] == 5:
-                        guess_value[send_name] = -1
-                if guess_index[send_name] == 3:
-                    value = guess_value[send_name] % 2
-                    guess_point = guess_table_B["G3"][value]
-                    guess_value[send_name] = guess_value[send_name]+1
-                    if guess_value[send_name] == 5:
-                        guess_value[send_name] = -1
+                    guess_point = guess_table_R["G3"][1]
+                else:
+                    guess_point = guess_table_R["G3"][0]
         return guess_point
 
 
@@ -243,56 +259,39 @@ def ser_send(pub):
                 # 英雄
                 if all_filter_data.get('B1', False):
                     target_position[0] = return_xy_B('B1')
-                    guess_index["B1"] = 0
-                    guess_value["B1"] = 0
                     if_guess[0] = False
                 else:
-                    if guess_value["B1"] > -1:
-                        target_position[0] = get_guess_point("B1")
-                        if_guess[0] = True
+                    target_position[0] = get_guess_point("B1")
+                    if_guess[0] = True
                 # 工程
                 if all_filter_data.get('B2', False):
                     target_position[1] = return_xy_B('B2')
-                    guess_index["B2"] = 0
-                    guess_value["B2"] = 0
                     if_guess[1] = False
                 else:
-                    if guess_value["B2"] > -1:
-                        target_position[1] = get_guess_point("B2")
-                        if_guess[1] = True
+                    target_position[1] = get_guess_point("B2")
+                    if_guess[1] = True
                 # 步兵3号
                 if all_filter_data.get('B3', False):
                     target_position[2] = return_xy_B('B3')
-                    guess_index["B3"] = 0
-                    guess_value["B3"] = 0
                     if_guess[2] = False
                 else:
-                    if guess_value["B3"] > -1:
-                        target_position[2] = get_guess_point("B3")
-                        if_guess[2] = True
+                    target_position[2] = get_guess_point("B3")
+                    if_guess[2] = True
                 # 步兵4号
                 if all_filter_data.get('B4', False):
                     target_position[3] = return_xy_B('B4')
-                    guess_index["B4"] = 0
-                    guess_value["B4"] = 0
                     if_guess[3] = False
                 else:
-                    if guess_value["B4"] > -1:
-                        target_position[3] = get_guess_point("B4")
-                        if_guess[3] = True
+                    target_position[3] = get_guess_point("B4")
+                    if_guess[3] = True
                 # 步兵5号
                 if all_filter_data.get('B5', False):
                     target_position[4] = return_xy_B('B5')
-                    guess_index["B5"] = 0
-                    guess_value["B5"] = 0
                 else:
-                    if guess_value["B5"] > -1:
-                        target_position[4] = get_guess_point("B5")
+                    target_position[4] = get_guess_point("B5")
                 # 哨兵
                 if all_filter_data.get('B7', False):
                     target_position[5] = return_xy_B('B7')
-                    guess_index["B7"] = 0
-                    guess_value["B7"] = 0
                     if_guess[4] = False
                 else:
                     target_position[5] = get_guess_point("B7")
@@ -303,56 +302,39 @@ def ser_send(pub):
                 # 英雄
                 if all_filter_data.get('R1', False):
                     target_position[0] = return_xy_R('R1')
-                    guess_index["R1"] = 0
-                    guess_value["R1"] = 0
                     if_guess[0] = False
                 else:
-                    if guess_value["R1"] > -1:
-                        target_position[0] = get_guess_point("R1")
-                        if_guess[0] = True
+                    target_position[0] = get_guess_point("R1")
+                    if_guess[0] = True
                 # 工程
                 if all_filter_data.get('R2', False):
                     target_position[1] = return_xy_R('R2')
-                    guess_index["R2"] = 0
-                    guess_value["R2"] = 0
                     if_guess[1] = False
                 else:
-                    if guess_value["R2"] > -1:
-                        target_position[1] = get_guess_point("R2")
-                        if_guess[1] = True
+                    target_position[1] = get_guess_point("R2")
+                    if_guess[1] = True
                 # 步兵3号
                 if all_filter_data.get('R3', False):
                     target_position[2] = return_xy_R('R3')
-                    guess_index["R3"] = 0
-                    guess_value["R3"] = 0
                     if_guess[2] = False
                 else:
-                    if guess_value["R3"] > -1:
-                        target_position[2] = get_guess_point("R3")
-                        if_guess[2] = True
+                    target_position[2] = get_guess_point("R3")
+                    if_guess[2] = True
                 # 步兵4号
                 if all_filter_data.get('R4', False):
                     target_position[3] = return_xy_R('R4')
-                    guess_index["R4"] = 0
-                    guess_value["R4"] = 0
                     if_guess[3] = False
                 else:
-                    if guess_value["R4"] > -1:
-                        target_position[3] = get_guess_point("R4")
-                        if_guess[3] = True
+                    target_position[3] = get_guess_point("R4")
+                    if_guess[3] = True
                 # 步兵5号
                 if all_filter_data.get('R5', False):
                     target_position[4] = return_xy_R('R5')
-                    guess_index["R5"] = 0
-                    guess_value["R5"] = 0
                 else:
-                    if guess_value["R5"] > -1:
-                        target_position[4] = get_guess_point("R5")
+                    target_position[4] = get_guess_point("R5")
                 # 哨兵
                 if all_filter_data.get('R7', False):
                     target_position[5] = return_xy_R('R7')
-                    guess_index["R7"] = 0
-                    guess_value["R7"] = 0
                     if_guess[4] = False
                 else:
                     target_position[5] = get_guess_point("R7")
@@ -434,10 +416,8 @@ class Filter:
 filter = Filter(window_size=3, max_inactive_time=2)
 
 # 加载模型，实例化机器人检测器和装甲板检测器
-weights_path = '/home/yang/double_camera/src/detect/scripts/models/car_m.engine'
-weights_path_next = '/home/yang/double_camera/src/detect/scripts/models/armor.engine'
-detector = YOLOv5Detector(weights_path, data='/home/yang/double_camera/src/detect/scripts/yaml/car.yaml',conf_thres=0.2, iou_thres=0.2, max_det=14, ui=True)
-detector_next = YOLOv5Detector(weights_path_next,data='/home/yang/double_camera/src/detect/scripts/yaml/armor.yaml', conf_thres=0.50, iou_thres=0.2,max_det=1,ui=True)
+detector = YOLOv5Detector(car_engine_path, data=car_yaml_path,conf_thres=0.2, iou_thres=0.2, max_det=14, ui=True)
+detector_next = YOLOv5Detector(armor_engine_path,data=armor_yaml_path, conf_thres=0.50, iou_thres=0.2,max_det=1,ui=True)
 
 
 # ROS相关变量
@@ -453,8 +433,7 @@ def image_callback(msg):
 
 
 
-# ROS节点初始化
-rospy.init_node('main_image_listener', anonymous=True)
+#ROS
 serial_pub = rospy.Publisher("robot_points_down",Serial_Send_Down,queue_size=1)
 rospy.Subscriber('/camera/image0', Image, image_callback,queue_size=1)
 
@@ -514,12 +493,12 @@ while True:
 
                         # t1 = time.time()
                         # 原图中装甲板的中心下沿作为待仿射变化的点
-                        # 修改后（正确）
+                        # yolo11会把变量存在gpu里
                         # x_cpu = x.detach().cpu().numpy()  # 如果 x 是张量
                         # w_cpu = w.detach().cpu().numpy()
                         # y_cpu = y.detach().cpu().numpy()
                         # h_cpu = h.detach().cpu().numpy()
-                        
+
                         x_cpu = x  
                         w_cpu = w
                         y_cpu = y
@@ -573,47 +552,48 @@ while True:
                                     filter.add_data(cls, X_M, Y_M)
                         
                         hide = hide_mask[y_c, x_c]
-                        if hide[0] == 255 and hide[1] != 255:
-                            guess_index[cls] = 1                     #前区
-                        if hide[1] == 255 and hide[2] != 255:
-                            guess_index[cls] = 2                     #家
-                        if hide[2] == 255 and hide[1] != 255:
-                            guess_index[cls] = 3                     #中央
+                        if hide[0] == 255 and hide[1] != 255:        # 红
+                            guess_index[cls] = 1                     # 前区
+                        if hide[1] == 255 and hide[2] != 255:        # 绿
+                            guess_index[cls] = 2                     # 家
+                        if hide[2] == 255 and hide[1] != 255:        # 蓝
+                            guess_index[cls] = 3                     # 中央
                         else:
                             guess_index[cls] = 0
-
-    # 获取所有识别到的机器人坐标
-    all_filter_data = filter.get_all_data()
-    if all_filter_data:  # 检查字典是否为空
-        for name, xyxy in all_filter_data.items():
-            if xyxy is not None:
-                if name[0] == "R":
-                    color_m = (0, 0, 255)
-                else:
-                    color_m = (255, 0, 0)
-                if state == 'R':
-                    filtered_xyz = (2800 - xyxy[1], xyxy[0])  # 缩放坐标到地图图像
-                else:
-                    filtered_xyz = (xyxy[1], 1500 - xyxy[0])  # 缩放坐标到地图图像
-                # 只绘制敌方阵营的机器人（这里不会绘制盲区预测的机器人）
-                # if name[0] != state:
-                cv2.circle(map, (int(filtered_xyz[0]), int(filtered_xyz[1])), 20, color_m, -1)  # 绘制圆
-                cv2.putText(map, str(name),
-                            (int(filtered_xyz[0]) - 5, int(filtered_xyz[1]) + 5),
-                            cv2.FONT_HERSHEY_SIMPLEX, 2.5, (255, 255, 255), 5)
-                ser_x = int(filtered_xyz[0]) * 10 / 1000
-                ser_y = int(1500 - filtered_xyz[1]) * 10 / 1000
-                cv2.putText(map, "(" + str(ser_x) + "," + str(ser_y) + ")",
-                            (int(filtered_xyz[0]) - 100, int(filtered_xyz[1]) + 60),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 4)
+    if (True):
+        # 获取所有识别到的机器人坐标
+        all_filter_data = filter.get_all_data()
+        if all_filter_data:  # 检查字典是否为空
+            for name, xyxy in all_filter_data.items():
+                if xyxy is not None:
+                    if name[0] == "R":
+                        color_m = (0, 0, 255)
+                    else:
+                        color_m = (255, 0, 0)
+                    if state == 'R':
+                        filtered_xyz = (2800 - xyxy[1], xyxy[0])  # 缩放坐标到地图图像
+                    else:
+                        filtered_xyz = (xyxy[1], 1500 - xyxy[0])  # 缩放坐标到地图图像
+                    # 只绘制敌方阵营的机器人（这里不会绘制盲区预测的机器人）
+                    # if name[0] != state:
+                    cv2.circle(map, (int(filtered_xyz[0]), int(filtered_xyz[1])), 20, color_m, -1)  # 绘制圆
+                    cv2.putText(map, str(name),
+                                (int(filtered_xyz[0]) - 5, int(filtered_xyz[1]) + 5),
+                                cv2.FONT_HERSHEY_SIMPLEX, 2.5, (255, 255, 255), 5)
+                    ser_x = int(filtered_xyz[0]) * 10 / 1000
+                    ser_y = int(1500 - filtered_xyz[1]) * 10 / 1000
+                    cv2.putText(map, "(" + str(ser_x) + "," + str(ser_y) + ")",
+                                (int(filtered_xyz[0]) - 100, int(filtered_xyz[1]) + 60),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 4)
+        map_show = cv2.resize(map, (1200, 640))
+        cv2.imshow('map', map_show)
 
 
     te = time.time()
     t_p = te - ts
     rospy.loginfo("fps1:%f",1 / t_p)  # 打印帧率
+    
     # 绘制UI
-    map_show = cv2.resize(map, (1200, 640))
-    cv2.imshow('map', map_show)
     img0 = cv2.resize(img0, (1300, 900))
     cv2.imshow('img', img0)
 

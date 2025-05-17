@@ -1,0 +1,8 @@
+<launch>
+    <rosparam command="load" file="/home/yang/double_camera/src/run_launch/config/blue.yaml" />
+    <node pkg="hk_driver2" type="my_hk_driver2" name="my_hk_driver_2" output="screen"/>
+    <node pkg="hk_driver" type="my_hk_driver" name="my_hk_driver" output="screen"/>
+    <node pkg="detect2" type="main2.py" name="main_detect_2" output="screen"/>
+    <node pkg="detect" type="main.py" name="main_detect_1" output="screen"/>
+    <node pkg="my_serial" type="RMSerial.py" name="RMSerial" output="screen"/>
+</launch>    

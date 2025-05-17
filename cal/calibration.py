@@ -15,11 +15,14 @@ from MvImport.MvCameraControl_class import *
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPixmap, QImage, QTextCursor
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QTextEdit, QGridLayout
+from PyQt5 import QtCore
 
 connection_event = threading.Event()
 #0下1上
 global nConnectionNum
 nConnectionNum = None
+
+points_list=None
 
 def hik_camera_get():
     # 获得设备信息
@@ -230,23 +233,25 @@ class MyUI(QWidget):
             if nConnectionNum == 0:
                 self.save_path = '/home/yang/double_camera/src/detect/scripts/npy/arrays_test_red.npy'
                 right_image_path = "/home/yang/double_camera/cal/images/pointed_red.png"
+                # right_image_path = "/home/yang/double_camera/cal/images/map_red.jpg"
                 print("红方：近场")
             elif nConnectionNum == 1:
                 self.save_path = '/home/yang/double_camera/src/detect2/scripts/npy/arrays_test_red.npy'
                 self.save_path = '/home/yang/PFA_radar-2025-main/arrays_test_red.npy'
+                # right_image_path = "/home/yang/double_camera/cal/images/map_red.jpg"
                 right_image_path = "/home/yang/double_camera/cal/images/pointed_red_far.png"  # 替换为右边图片的路径
                 print("红方：远场")
         else:
             if nConnectionNum == 0:
                 self.save_path = '/home/yang/double_camera/src/detect/scripts/npy/arrays_test_blue.npy'
                 right_image_path = "/home/yang/double_camera/cal/images/pointed_blue.png" 
-                # right_image_path = "/home/yang/double_camera/cal/images/baolei_0422.png" 
+                # right_image_path = "/home/yang/double_camera/cal/images/map_blue.jpg"
                 print("蓝方：近场")
             elif nConnectionNum == 1:
                 self.save_path = '/home/yang/double_camera/src/detect2/scripts/npy/arrays_test_blue.npy'
                 self.save_path = '/home/yang/PFA_radar-2025-main/arrays_test_blue.npy'
                 right_image_path = "/home/yang/double_camera/cal/images/pointed_blue_far.png"  # 替换为右边图片的路径
-                # right_image_path = "/home/yang/double_camera/cal/images/baolei_0422.png" 
+                # right_image_path = "/home/yang/double_camera/cal/images/map_blue.jpg"
                 print("蓝方：远场")
 
         # _,left_image = self.camera_capture.read()
@@ -303,6 +308,107 @@ class MyUI(QWidget):
         self.setGeometry(0, 0, 1900, 1000)
         self.setWindowTitle('Calibration UI')
         self.show()
+    
+    def harris_features(self, image):
+        try:
+            # 转换为灰度图
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            gray = np.float32(gray)  # Harris算法需要float32类型
+            
+            # 应用Harris角点检测
+            dst = cv2.cornerHarris(gray, blockSize=2, ksize=1, k=0.001)
+            
+            # 角点增强（膨胀操作）
+            dst = cv2.dilate(dst, None)
+            
+            # 设置角点检测阈值（可根据实际情况调整）
+            threshold = 0.01 * dst.max()
+            corner_mask = dst > threshold
+            
+            # 创建角点列表
+            kp = []
+            for y in range(corner_mask.shape[0]):
+                for x in range(corner_mask.shape[1]):
+                    if corner_mask[y, x]:
+                        # 创建KeyPoint对象（x, y坐标，尺寸，方向）
+                        kp.append(cv2.KeyPoint(x, y, 10))  # 尺寸设为10，方向默认为-1（未定义）
+            
+            # 在原图上绘制角点
+            image_with_keypoints = cv2.drawKeypoints(
+                image, kp, None, color=(0, 255, 0), 
+                flags=cv2.DrawMatchesFlags_DRAW_RICH_KEYPOINTS
+            )
+            
+            # 返回结果（注意：Harris没有描述符，所以第二个返回值为None）
+            return image_with_keypoints, kp
+        
+        except Exception as e:
+            print(f"发生错误: {e}")
+            return None, None
+
+    def sift_features(self, image):
+        try:
+            # 转换为灰度图
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            
+            # 初始化SIFT检测器
+            sift = cv2.SIFT_create()
+            kp, des = sift.detectAndCompute(gray, None)         
+            # 在原图上绘制关键点
+            image_with_keypoints = cv2.drawKeypoints(image, kp, None, color=(0, 255, 0), flags=cv2.DrawMatchesFlags_DRAW_RICH_KEYPOINTS)
+            
+            return image_with_keypoints,kp
+        except Exception as e:
+            print(f"发生错误: {e}")
+            return None,None
+    
+    def fast_features(self, image):
+        try:
+            # 转换为灰度图
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            
+            # 初始化FAST检测器
+            # 参数说明：
+            #   threshold: 像素强度差异阈值，用于判断是否为角点
+            #   nonmaxSuppression: 是否应用非极大值抑制，避免角点聚集
+            #   type: 角点检测类型，可选值包括：
+            #         - cv2.FAST_FEATURE_DETECTOR_TYPE_5_8 (默认)
+            #         - cv2.FAST_FEATURE_DETECTOR_TYPE_7_12
+            #         - cv2.FAST_FEATURE_DETECTOR_TYPE_9_16
+            fast = cv2.FastFeatureDetector_create(
+                threshold=10, 
+                nonmaxSuppression=True,
+                type=cv2.FAST_FEATURE_DETECTOR_TYPE_9_16
+            )
+            
+            # 检测关键点
+            kp = fast.detect(gray, None)
+            
+            # 在原图上绘制关键点
+            image_with_keypoints = cv2.drawKeypoints(
+                image, kp, None, color=(0, 255, 0),
+                flags=cv2.DrawMatchesFlags_DRAW_RICH_KEYPOINTS
+            )
+            
+            # 返回结果（注意：FAST不计算描述符，所以第二个返回值为None）
+            return image_with_keypoints, kp
+        
+        except Exception as e:
+            print(f"发生错误: {e}")
+            return None, None
+
+
+    def find_nearest_point(self, point, point_list):
+        if not point_list:
+            return None, -1     
+        # 将输入点转换为NumPy数组以便计算
+        point = np.array(point)
+        # 计算给定点到point_list中每个点的欧氏距离
+        distances = np.sqrt(np.sum((np.array(point_list) - point) ** 2, axis=1))
+        # 找出最小距离的索引
+        nearest_index = np.argmin(distances)
+        # 返回最近点及其索引
+        return point_list[nearest_index], nearest_index
 
     def keyPressEvent(self, event):
         # 按下键盘事件
@@ -310,37 +416,57 @@ class MyUI(QWidget):
             self.close()
 
     def update_images(self):
-
         left_pixmap = self.convert_cvimage_to_pixmap(self.left_image)
         self.left_top_label.setPixmap(left_pixmap)
-
 
         right_pixmap = self.convert_cvimage_to_pixmap(self.right_image)
         self.right_top_label.setPixmap(right_pixmap)
 
     def update_camera(self):
+        global points_list
         if self.capturing:
             img0 = camera_image
-            left_image = cv2.cvtColor(img0, cv2.COLOR_BGR2RGB)
+            left_image,kp = self.fast_features(img0)
+            points_list = [(kp.pt[0], kp.pt[1]) for kp in kp]
+            left_image = cv2.cvtColor(left_image, cv2.COLOR_BGR2RGB)
             self.left_image = cv2.resize(left_image, (1350, 1000))
             self.update_images()
 
     def left_top_clicked(self, event):
-        # 图像点击事件
-        if not self.capturing:
+        # 图像点击事件 - 仅处理鼠标左键点击
+        if not self.capturing and event.button() == QtCore.Qt.LeftButton:  # 添加左键判断
             x = int(event.pos().x() * self.left_scale_x)
             y = int(event.pos().y() * self.left_scale_y)
 
-            self.image_points[self.height][self.image_count % 4] = (x, y)
+            click_point = (int(x), int(y))
+            point, id = self.find_nearest_point(click_point, points_list)
+            self.image_points[self.height][self.image_count % 4] = (point[0], point[1])
+            point = (int(point[0]/self.left_scale_x), int(point[1]/self.left_scale_y))
 
-            cv2.circle(self.left_image, (int(x / self.left_scale_x), int(y / self.left_scale_y)), 4, color[self.height],
-                       -1)
+            cv2.circle(self.left_image, point, 4, color[self.height], -1)
             cv2.putText(self.left_image, str(self.image_count % 4),
-                        (int(x / self.left_scale_x), int(y / self.left_scale_y)), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                        color[self.height], 3)
+                        (int(x / self.left_scale_x), int(y / self.left_scale_y)), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, color[self.height], 3)
             self.image_count += 1
             self.update_images()
             self.append_text(f'图像真实点击坐标：({x}, {y})')
+        elif not self.capturing and event.button() == QtCore.Qt.RightButton:  # 添加左键判断
+            x = int(event.pos().x() * self.left_scale_x)
+            y = int(event.pos().y() * self.left_scale_y)
+
+            point = (int(x), int(y))
+            
+            self.image_points[self.height][self.image_count % 4] = (point[0], point[1])
+            point = (int(point[0]/self.left_scale_x), int(point[1]/self.left_scale_y))
+
+            cv2.circle(self.left_image, point, 4, color[self.height], -1)
+            cv2.putText(self.left_image, str(self.image_count % 4),
+                        (int(x / self.left_scale_x), int(y / self.left_scale_y)), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, color[self.height], 3)
+            self.image_count += 1
+            self.update_images()
+            self.append_text(f'图像真实点击坐标：({x}, {y})')
+
 
     def right_top_clicked(self, event):
         # 地图点击事件
@@ -350,8 +476,7 @@ class MyUI(QWidget):
             self.map_points[self.height][self.map_count % 4] = (x, y)
 
             cv2.circle(self.right_image, (int(x / self.right_scale_x), int(y / self.right_scale_y)), 4,
-                       color[self.height],
-                       -1)
+                        color[self.height],-1)
             cv2.putText(self.right_image, str(self.map_count % 4),
                         (int(x / self.right_scale_x), int(y / self.right_scale_y)), cv2.FONT_HERSHEY_SIMPLEX, 1,
                         color[self.height], 2)
@@ -420,13 +545,13 @@ class MyUI(QWidget):
 if __name__ == '__main__':
     camera_mode = 'hik'  # 'test':图片测试, 'video':视频测试, 'hik':海康相机, 'galaxy':大恒相机, 'usb':USB相机
     camera_image = None
-    state = 'B'  # R:红方/B:蓝方
+    state = 'R'  # R:红方/B:蓝方
 
     if len(sys.argv) > 0:
         nConnectionNum = int(sys.argv[1])
     
     if camera_mode == 'test':
-        camera_image = cv2.imread('images/test_image.jpg')
+        camera_image = cv2.imread('/home/yang/PFA_radar-2025-main/images/test_image.jpg')
     elif camera_mode == 'video':
         thread_camera = threading.Thread(target=video_test_get, daemon=True)
         thread_camera.start()
@@ -443,8 +568,8 @@ if __name__ == '__main__':
     while camera_image is None:
         print("等待图像。。。")
         time.sleep(0.5)
-    
-    connection_event.wait()
+    if camera_mode !="test":
+        connection_event.wait()
     print("nConnectionNum get the number :",nConnectionNum)
     app = QApplication(sys.argv)
     myui = MyUI()

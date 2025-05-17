@@ -1,0 +1,24 @@
+编译  catkin build -DPYTHON_EXECUTABLE=/usr/bin/python3
+大恒  roslaunch galaxy_camera MER-139.launch 
+海康   rosrun hk_driver my_hk_driver 
+激活环境 source ENV_DIR/bin/activate
+性能模式 sudo cpufreq-set -g Performance
+
+CUDA报错： 999    
+sudo rmmod nvidia_uvm
+sudo modprobe nvidia_uvm
+
+
+deactivate
+
+python3.8 calibration.py 0
+python3.8 calibration.py 1
+roscore
+source devel/setup.bash 
+roslaunch run_launch run.launch 
+
+
+. pfa_vision_radar-master/venv-demo/bin/activate
+cd /home/yang/Downloads/PFA_radar-2025-main
+
+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
