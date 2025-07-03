@@ -32,6 +32,7 @@ car_engine_path = rospy.get_param("/device_up/detect/car/engine")
 car_yaml_path = rospy.get_param("/device_up/detect/car/yaml")
 armor_engine_path = rospy.get_param("/device_up/detect/armor/engine")
 armor_yaml_path = rospy.get_param("/device_up/detect/armor/yaml")
+
 print("*"*10,"config","*"*10)
 print('state              :', state)
 print('npy_path           :', npy_path)
@@ -141,14 +142,14 @@ guess_index = {
 guess_table_B = {
     "G0": [(662,752), (408,754)],           # 堡垒，家
     "G1": [(216, 92), (1344, 798)],        # 兑换站，大风车
-    "G2": [(1070,1134), (930,1280)],           # 洞，高地
-    "G3": [(248, 252), (1068, 1126)]        # 维修站，家
+    "G2": [(1010,1066), (1000,404)],           # 洞，前哨站洞
+    "G3": [(248, 252), (1068, 1126)]        # 维修站，洞
 }
 
 guess_table_R = {
     "G0": [(2128, 754),(2388, 754)],
     "G1": [(2582, 1398), (1474, 700)],
-    "G2": [(1724, 370), (1872, 226)],
+    "G2": [(1772, 442), (1790, 1108)],
     "G3": [(2544, 1254), (1736, 392)]
 }
 

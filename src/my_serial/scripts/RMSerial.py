@@ -39,8 +39,19 @@ target_last = 0  # 上一帧的飞镖目标
 rospy.init_node('data_receiver', anonymous=True)
 state =  rospy.get_param("/state")  # R：红方；B：蓝方
 map_path = rospy.get_param("/device_up/image/map")
-rospy.loginfo('state : %s', state)
+rospy.loginfo('!!!!!!!state!!!!!!! : %s', state)
 map = cv2.imread(map_path)
+
+def forbidden_area(state, point):
+    x = point[0]
+    y = point[1]
+    if state == "r":
+        if ((x>2500) and (y<520)):
+            x = 2452
+    else:
+        if ((x<300) and (y>1000)):
+            x = 346
+    return (x,y)
 
 def convert_to_uint16(data_list):
     uint16_list = []
@@ -197,44 +208,58 @@ def safe_bet(down_data,up_data,state):
         3:up_data.position_4_up,
         4:up_data.position_7_up,
     }
+    # print("state: ",state)
 
-    if state == 'R':
-        for i in range(0,4):
+
+    if state is 'R':
+        # print("down_guess: ",down_guess)
+        # print("up_guess: ",up_guess)
+        # print("up_dict : ",up_dict)
+        # print("down_dict: ",down_dict)
+        for i in range(0,5):
             if up_guess[i] and down_guess[i]:
                 send_sentry_list[i]=(0,0)
-                send_list[i]=up_dict[i]
-            elif not up_guess[i] and down_guess[i]:
+                send_list[i]=down_dict[i]
+            elif (not up_guess[i]) and down_guess[i]:
                 send_sentry_list[i]=up_dict[i]
                 send_list[i]=up_dict[i]
-            elif up_guess[i] and not down_guess[i]:
+                # print(i," aa........!............a  ",down_dict[i])
+            elif (up_guess[i] and (not down_guess[i])):
                 send_sentry_list[i]=down_dict[i]
                 send_list[i]=down_dict[i]
+                # print(i," aa....................a  ",down_dict[i])
             else:
-                if(up_dict[i][0]<13):
+                if(down_dict[i][0]<13):
                     send_sentry_list[i]=down_dict[i]
                     send_list[i]=down_dict[i]
                 else:
                     send_sentry_list[i]=up_dict[i]
                     send_list[i]=up_dict[i]
     else:
-        for i in range(0,4):
+        # print("down_guess: ",down_guess)
+        # print("up_guess: ",up_guess)
+        for i in range(0,5):
             if up_guess[i] and down_guess[i]:
                 send_sentry_list[i]=(0,0)
-                send_list[i]=up_dict[i]
-            elif not up_guess[i] and down_guess[i]:
+                send_list[i]=down_dict[i]
+            elif (not up_guess[i]) and down_guess[i]:
                 send_sentry_list[i]=up_dict[i]
                 send_list[i]=up_dict[i]
-            elif up_guess[i] and not down_guess[i]:
+            elif up_guess[i] and (not down_guess[i]):
                 send_sentry_list[i]=down_dict[i]
                 send_list[i]=down_dict[i]
+                # print("!!!!!!",down_dict[i])
+                
             else:
-                if(up_dict[i][0]>15):
+                if(down_dict[i][0]>15):
                     send_sentry_list[i]=down_dict[i]
                     send_list[i]=down_dict[i]
                 else:
                     send_sentry_list[i]=up_dict[i]
                     send_list[i]=up_dict[i]
+    # print("!!!!!!!:",send_list)
     send_list.insert(4,(0,0))
+    # print(">??????: ",send_list)
     return send_list,send_sentry_list
 
 def map_ui(data,state,map,color,radius):
@@ -341,13 +366,15 @@ def listener():
         ser_receive(ser)
 
         up_data = up_ros_data
+        # print("up_data:",up_data)
         down_data = down_ros_data
+        # print("down_data: ",down_data)
 
         data_list,send_sentry = safe_bet(down_data,up_data,state)
 
         #  转16位发送
         uint16_data_list=convert_to_uint16(data_list)
-        # print("uint16_data_list:  ",uint16_data_list)
+        # print("data_list:  ",data_list)
         ser_data = build_data_radar(uint16_data_list)
         # print("ser_data:  ",ser_data)
         packet, seq = build_send_packet(ser_data, seq, [0x03, 0x05])
@@ -366,8 +393,9 @@ def listener():
         # 有双倍易伤机会，并且当前没有在双倍易伤
         # 判断飞镖的目标是否切换，切换则尝试发动双倍易伤
         
-        if target != target_last and target != 0:
-            target_last = target
+        # if target != target_last and target != 0:
+        #     target_last = target
+        if True:
             # 有双倍易伤机会，并且当前没有在双倍易伤
             if double_vulnerability_chance > 0 and opponent_double_vulnerability == 0:
                 time_e = time.time()
@@ -406,7 +434,6 @@ def listener():
         cv2.waitKey(1)
 
         rate.sleep()
-        
 
 if __name__ == '__main__':
     listener()

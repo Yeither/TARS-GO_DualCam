@@ -194,10 +194,15 @@ class MyUI(QWidget):
         self.left_top_label.setStyleSheet("border: 2px solid black;")
         self.left_top_label.mousePressEvent = self.left_top_clicked
         self.image_points = [[(0, 0), (0, 0), (0, 0), (0, 0)], [(0, 0), (0, 0), (0, 0), (0, 0)]]
+        # if nConnectionNum == 0:
+        #     self.map_points = [[(668, 2199), (859, 2199), (684, 1897), (839, 1897)], [(278, 1132), (280, 1543), (1126, 1263), (1126, 1620)]]
+        # elif nConnectionNum == 1:
+        #     self.map_points = [[(668, 724), (861, 721), (684, 1897), (842, 1897)], [(474, 1182), (597, 1680), (1129, 1256), (1126, 1617)]]
         if nConnectionNum == 0:
-            self.map_points = [[(925, 1045), (552, 982), (709, 335), (1049, 365)], [(1117, 915), (517, 1117), (580, 337), (1186, 4630)]]
+            self.map_points = [[(657, 2202), (850, 2199), (676, 1894), (829, 1894)], [(272, 1135), (270, 1546), (1112, 1266), (1115, 1627)]]
         elif nConnectionNum == 1:
-            self.map_points = [[(1107, 2435), (1183, 2087), (654, 2085), (522, 2252)], [(1492, 2412), (1178, 1618), (3843, 1537), (12, 2489)]]
+            self.map_points = [[(668, 724), (861, 721), (684, 1897), (842, 1897)], [(474, 1182), (597, 1680), (1129, 1256), (1126, 1617)]]
+        
         self.image_count = 0
         self.map_count = 0
         # 右上角部分
@@ -232,26 +237,32 @@ class MyUI(QWidget):
         if self.state == 'R':
             if nConnectionNum == 0:
                 self.save_path = '/home/yang/double_camera/src/detect/scripts/npy/arrays_test_red.npy'
-                right_image_path = "/home/yang/double_camera/cal/images/pointed_red.png"
+                self.save_path2 = '/home/yang/PFA_radar-2025-main/arrays_test_red.npy'
+                right_image_path = "/home/yang/double_camera/cal/images/map_red_marked_close.jpg"
                 # right_image_path = "/home/yang/double_camera/cal/images/map_red.jpg"
                 print("红方：近场")
             elif nConnectionNum == 1:
                 self.save_path = '/home/yang/double_camera/src/detect2/scripts/npy/arrays_test_red.npy'
-                self.save_path = '/home/yang/PFA_radar-2025-main/arrays_test_red.npy'
+                self.save_path2 = self.save_path
+                # self.save_path = '/home/yang/PFA_radar-2025-main/arrays_test_red.npy'
                 # right_image_path = "/home/yang/double_camera/cal/images/map_red.jpg"
-                right_image_path = "/home/yang/double_camera/cal/images/pointed_red_far.png"  # 替换为右边图片的路径
+                right_image_path = "/home/yang/double_camera/cal/images/map_red_marked_far.jpg"  # 替换为右边图片的路径
                 print("红方：远场")
         else:
             if nConnectionNum == 0:
                 self.save_path = '/home/yang/double_camera/src/detect/scripts/npy/arrays_test_blue.npy'
-                right_image_path = "/home/yang/double_camera/cal/images/pointed_blue.png" 
+                self.save_path2 = '/home/yang/PFA_radar-2025-main/arrays_test_blue.npy'
+                right_image_path = "/home/yang/double_camera/cal/images/map_blue_marked_close.jpg" 
+                # right_image_path = "/home/yang/map_blue.jpg" 
                 # right_image_path = "/home/yang/double_camera/cal/images/map_blue.jpg"
                 print("蓝方：近场")
             elif nConnectionNum == 1:
                 self.save_path = '/home/yang/double_camera/src/detect2/scripts/npy/arrays_test_blue.npy'
-                self.save_path = '/home/yang/PFA_radar-2025-main/arrays_test_blue.npy'
-                right_image_path = "/home/yang/double_camera/cal/images/pointed_blue_far.png"  # 替换为右边图片的路径
+                self.save_path2 = self.save_path
+                # self.save_path = '/home/yang/PFA_radar-2025-main/arrays_test_blue.npy'
+                right_image_path = "/home/yang/double_camera/cal/images/map_blue_marked_far.jpg"  # 替换为右边图片的路径
                 # right_image_path = "/home/yang/double_camera/cal/images/map_blue.jpg"
+                # right_image_path = "/home/yang/map_blue.jpg" 
                 print("蓝方：远场")
 
         # _,left_image = self.camera_capture.read()
@@ -397,6 +408,50 @@ class MyUI(QWidget):
             print(f"发生错误: {e}")
             return None, None
 
+    def fast_orb_features(self, image):
+        try:
+            # 转换为灰度图
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            
+            # 初始化ORB检测器
+            # 参数说明：
+            #   nfeatures: 保留的最大特征点数量
+            #   scaleFactor: 金字塔缩放因子
+            #   nlevels: 金字塔层数
+            #   edgeThreshold: 关键点检测的边界阈值
+            #   firstLevel: 金字塔的第一层索引
+            #   WTA_K: 生成BRIEF描述子时使用的随机点对数量
+            #   scoreType: 关键点排序方法（HARRIS_SCORE或FAST_SCORE）
+            #   patchSize: 描述符计算的补丁大小
+            #   fastThreshold: FAST算法的阈值
+            orb = cv2.ORB_create(
+                nfeatures=1000,
+                scaleFactor=1.2,
+                nlevels=8,
+                edgeThreshold=31,
+                firstLevel=0,
+                WTA_K=2,
+                scoreType=cv2.ORB_HARRIS_SCORE,
+                patchSize=31,
+                fastThreshold=20
+            )
+            
+            # 检测关键点并计算描述符
+            kp, des = orb.detectAndCompute(gray, None)
+            
+            # 在原图上绘制关键点
+            image_with_keypoints = cv2.drawKeypoints(
+                image, kp, None, color=(0, 255, 0),
+                flags=cv2.DrawMatchesFlags_DRAW_RICH_KEYPOINTS
+            )
+            
+            # 返回结果（ORB同时提供关键点和描述符）
+            return image_with_keypoints, kp
+        
+        except Exception as e:
+            print(f"发生错误: {e}")
+            return None, None
+
 
     def find_nearest_point(self, point, point_list):
         if not point_list:
@@ -426,6 +481,7 @@ class MyUI(QWidget):
         global points_list
         if self.capturing:
             img0 = camera_image
+            
             left_image,kp = self.fast_features(img0)
             points_list = [(kp.pt[0], kp.pt[1]) for kp in kp]
             left_image = cv2.cvtColor(left_image, cv2.COLOR_BGR2RGB)
@@ -514,7 +570,10 @@ class MyUI(QWidget):
             map_point = np.array(self.map_points[i], dtype=np.float32)
             self.T.append(cv2.getPerspectiveTransform(image_point, map_point))
 
+        np.save("./image_points.txt", self.image_points)
+        np.save("./map_points.txt", self.map_points)
         np.save(self.save_path, self.T)
+        np.save(self.save_path2, self.T)
 
         self.append_text('保存计算')
         print('保存计算', self.save_path)
@@ -545,7 +604,7 @@ class MyUI(QWidget):
 if __name__ == '__main__':
     camera_mode = 'hik'  # 'test':图片测试, 'video':视频测试, 'hik':海康相机, 'galaxy':大恒相机, 'usb':USB相机
     camera_image = None
-    state = 'R'  # R:红方/B:蓝方
+    state = 'B'  # R:红方/B:蓝方
 
     if len(sys.argv) > 0:
         nConnectionNum = int(sys.argv[1])

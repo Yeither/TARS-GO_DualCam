@@ -344,7 +344,7 @@ int main(int argc, char** argv)
         }
 
         // 6. 设置曝光时间
-        float ExposureTimeValue = 16000.0f;  // 设置曝光时间（单位：微秒，根据需要调整）
+        float ExposureTimeValue = 8000.0f;  // 设置曝光时间（单位：微秒，根据需要调整）
         nRet = MV_CC_SetFloatValue(handle, "ExposureTime", ExposureTimeValue);
         if (MV_OK != nRet)
         {
@@ -353,7 +353,7 @@ int main(int argc, char** argv)
         }
 
         // 7. 设置增益
-        float GainValue = 17.9f;  // 设置增益值，根据需要调整
+        float GainValue = 19.9f;  // 设置增益值，根据需要调整
         nRet = MV_CC_SetFloatValue(handle, "Gain", GainValue);
         if (MV_OK != nRet)
         {

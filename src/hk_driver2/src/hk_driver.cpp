@@ -340,7 +340,7 @@ int main(int argc, char** argv)
         }
 
         // 6. 设置曝光时间
-        float ExposureTimeValue = 16000.0f;  // 设置曝光时间（单位：微秒，根据需要调整）
+        float ExposureTimeValue = 8000.0f;  // 设置曝光时间（单位：微秒，根据需要调整）
         nRet = MV_CC_SetFloatValue(handle, "ExposureTime", ExposureTimeValue);
         if (MV_OK != nRet)
         {

@@ -18,8 +18,8 @@ device_down:
 
 device_up:
   image:
-    npy: '/home/yang/double_camera/src/detect2/scripts/npy/arrays_test_red.npy'
-    map_v: '/home/yang/double_camera/src/detect2/scripts/images/map_red.jpg'
+    npy: '/home/yang/double_camera/src/detect2/scripts/npy/arrays_test_blue.npy'
+    map_v: '/home/yang/double_camera/src/detect2/scripts/images/map_blue.jpg'
     mask_map: '/home/yang/double_camera/src/detect2/scripts/images/map_mask.jpg'
     hide_map: '/home/yang/double_camera/src/detect2/scripts/images/hide_mask.jpg'
     map: '/home/yang/double_camera/src/detect2/scripts/images/map.jpg'
